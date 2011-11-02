@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import sys
+import os
+from argparse import ArgumentParser
+from ConfigParser import ConfigParser
+
+import standings
+
+def load_config(file='~/.evestandings.conf'):
+    config = ConfigParser()
+    file = os.path.expanduser(file)
+    if os.path.exists(file):
+        config.read(file)
+        outconfig = object()
+        for name, val in config.items('standings'):
+            setattr(outconfig, name, val)
+        return outconfig
+    else:
+        return {}
+
+def output_html(keyid, vcode, character, type):
+    sys.stdout.write(Standings(keyid, vcode, character, type=type)._get_html())
+
+if __name__ == '__main__':
+
+    parser = ArgumentParser(prog='EVEStandings', description='Outputs a EVE corporation/alliance standings to a HTML page')
+    parser.add_argument('-k', '--keyid', help='Key ID of the API key')
+    parser.add_argument('-v', '--vcode', help='vCode of the API key')
+    parser.add_argument('-c', '--character', help='Character whos corporation you wish to output')
+    parser.add_argument('-t', '--type', help='Type of standings list, either corp or alliance')
+    parser.add_argument('-C', '--config', help='Path to your configuration file')
+    parser.add_argument('-f', '--output', help='Output the resulting HTML to a file')
+    parser.add_argument('--template', help='Location of a customized template to use instead of the default')
+    parser.add_argument('--version', action='version', version='%(prog)s ' + standings.__version__)
+
+    ns = parser.parse_args()
+
+    # 
+    if 'keyid' in ns or 'vcode' in ns:
+        conf = ns
+    else:
+        if 'config' in ns:
+            conf = load_config(ns['config'])
+        else:
+            conf = load_config()
+
+    if not conf.keyid or not conf.vcode:
+        sys.stderr.write('Key ID or vCode is missing, please provide both on the command line or in the config file\n')
+        parser.print_help()
+        sys.exit(os.EX_USAGE)
+
+    print ns
+    obj = standings.Standings(conf.keyid, conf.vcode, conf.character)
+    html = obj._get_html(conf.template)
+
+    if conf.output:
+        f = open(os.path.expanduser(conf.output), 'w')
+        f.write(html)
+        f.close()
+    else:
+        sys.stdout.write(html)
+
+    sys.exit(0)

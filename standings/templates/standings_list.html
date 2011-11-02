@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>{{ name }} Standings</title>
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+{% for type in standings %}
+        <div class="row" id="{{ type }}">
+        <p><h1 class="muted">{{ type }}</h1></p>
+        <p>
+          {% for type, id, entname, standing in standings[type] %}
+          <img src="{% if type == 'corp' %}http://image.eveonline.com/Corporation/{{ id }}_64.png{% endif %}{% if type == 'alli' %}http://image.eveonline.com/Alliance/{{ id }}_64.png{% endif %}{% if type == 'char' %}http://image.eveonline.com/Character/{{ id }}_64.jpg{% endif %}" title="{{ entname }} ({{ standing }})"></li>
+          {% endfor %}
+        </p>
+        </div>
+{% endfor %}
+{% endblock %}

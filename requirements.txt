@@ -1,0 +1,4 @@
+-e git+https://github.com/nikdoof/eveapi.git#egg=eveapi
+ordereddict
+jinja2
+argparse
